@@ -1,0 +1,16 @@
+connections/org.eclipse.remote.serial.core.connectionType/UART9600/serial.baudRate=6
+connections/org.eclipse.remote.serial.core.connectionType/UART9600/serial.byteSize=3
+connections/org.eclipse.remote.serial.core.connectionType/UART9600/serial.parity=0
+connections/org.eclipse.remote.serial.core.connectionType/UART9600/serial.portName=COM8
+connections/org.eclipse.remote.serial.core.connectionType/UART9600/serial.stopBits=0
+connections/org.eclipse.remote.serial.core.connectionType/ft232log/serial.baudRate=11
+connections/org.eclipse.remote.serial.core.connectionType/ft232log/serial.byteSize=3
+connections/org.eclipse.remote.serial.core.connectionType/ft232log/serial.parity=0
+connections/org.eclipse.remote.serial.core.connectionType/ft232log/serial.portName=COM8
+connections/org.eclipse.remote.serial.core.connectionType/ft232log/serial.stopBits=0
+connections/org.eclipse.remote.serial.core.connectionType/tf232/serial.baudRate=11
+connections/org.eclipse.remote.serial.core.connectionType/tf232/serial.byteSize=3
+connections/org.eclipse.remote.serial.core.connectionType/tf232/serial.parity=0
+connections/org.eclipse.remote.serial.core.connectionType/tf232/serial.portName=COM8
+connections/org.eclipse.remote.serial.core.connectionType/tf232/serial.stopBits=0
+eclipse.preferences.version=1
