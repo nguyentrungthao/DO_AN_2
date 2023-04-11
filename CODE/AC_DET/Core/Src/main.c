@@ -35,22 +35,25 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define LED_ON 0
+#define LED_OFF 1
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
-
+//uint32_t tgKich = 0;
+volatile uint8_t flag = 0;
+uint8_t tgDelayTaoGocKich = 0; // giá trị không được vượt qá 10ms
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+void TaoXungKickTriac();
+//void DelayFunction(uint32_t tgDelay, void(*Function)());
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -65,7 +68,8 @@ static void MX_TIM1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  uint32_t tgDelayTaoXung = 0;
+  uint8_t ledStatus = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -86,7 +90,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -95,9 +98,33 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  //tg kích ms
+//	  if(flag == 0) {
+//		  tgKich = HAL_GetTick();
+//	  }
+//	  else if(HAL_GetTick() - tgKich >= tgDelayTaoGocKich){
+//		  TaoXungKickTriac();
+//		  flag = 0;
+//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if(flag == 1){
+//		  HAL_Delay(tgDelayTaoGocKich);
+		  // tìm cách delay khúc này =>
+		  if(tgDelayTaoGocKich > 0){
+			  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+		  }
+		  HAL_Delay(1);
+		  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
+		  flag = 0;
+	  }
+	  if(HAL_GetTick() - tgDelayTaoXung >= 1000){
+		  tgDelayTaoXung = HAL_GetTick();
+		  ledStatus = ~ledStatus;
+		  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledStatus);
+	  }
+
   }
   /* USER CODE END 3 */
 }
@@ -139,71 +166,6 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM1_Init(void)
-{
-
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM1_Init 2 */
-
-  /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim1);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -213,20 +175,88 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /*Configure GPIO pin : PB0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ACDET_Pin */
+  GPIO_InitStruct.Pin = ACDET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ACDET_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TRIAC_Pin */
+  GPIO_InitStruct.Pin = TRIAC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(TRIAC_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+//	HAL_Delay(0); // delay 5ms mất nữa sóng
+//	// tạo xung kích cho triac
+//	HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+//	HAL_Delay(1);
+//	HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
+	if(tgDelayTaoGocKich == 0){
+		HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+	}
+	flag = 1;
+}
+//void TaoXungKickTriac(){
+//	static uint8_t step = 0;
+//	static uint32_t T_TRIAC = 0;
+//	switch(step){
+//	case 0:
+//		HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+//		T_TRIAC = HAL_GetTick();
+//		step = 1;
+//		break;
+//	case 1:
+//		if(HAL_GetTick() - T_TRIAC >= 1){
+//			HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
+//			step = 0;
+//			flag = 0;
+//		}
+//	}
+//}
 
+//void DelayFunction(uint32_t tgDelay, void(*Function)()){
+//	static uint8_t step = 0;
+//	static uint32_t T = 0;
+//	switch(step){
+//	case 0:
+//		T = HAL_GetTick();
+//		step = 1;
+//		break;
+//	case 1:
+//		if(HAL_GetTick() - T >= tgDelay){
+//			Function();
+//			step = 0;
+//		}
+//	}
+//}
 /* USER CODE END 4 */
 
 /**

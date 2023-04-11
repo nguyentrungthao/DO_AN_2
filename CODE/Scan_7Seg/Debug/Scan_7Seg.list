@@ -119,8 +119,8 @@ int main(void)
  8000166:	2000      	movs	r0, #0
  8000168:	f000 f972 	bl	8000450 <dichDuLieu74595>
 
-  HAL_GPIO_WritePin(OE_GPIO_Port, OE_Pin, 1); // cho phép xuất liên tục
- 800016c:	2201      	movs	r2, #1
+  HAL_GPIO_WritePin(OE_GPIO_Port, OE_Pin, 0); // cho phép xuất liên tục
+ 800016c:	2200      	movs	r2, #0
  800016e:	2180      	movs	r1, #128	; 0x80
  8000170:	4849      	ldr	r0, [pc, #292]	; (8000298 <main+0x14c>)
  8000172:	f000 fd6d 	bl	8000c50 <HAL_GPIO_WritePin>

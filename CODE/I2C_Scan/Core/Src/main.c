@@ -35,6 +35,7 @@ uint8_t EndMSG[] = "Done! \r\n\r\n";
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define SHT31_ADDRESS 0x44
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -102,7 +103,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_Delay(1000);
-
 
   /* USER CODE END 2 */
 

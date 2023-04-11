@@ -1,4 +1,4 @@
-** I2C
+** I2C địa chỉ 0x44
 - cấp nguồn ngoài
 - reset ST
 

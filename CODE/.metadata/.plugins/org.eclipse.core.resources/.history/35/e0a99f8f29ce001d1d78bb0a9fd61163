@@ -1,0 +1,37 @@
+/*
+ * SHT31.h
+ *
+ *  Created on: Mar 29, 2023
+ *      Author: Nguyen Trung Thao
+ */
+
+#ifndef INC_SHT31_H_
+#define INC_SHT31_H_
+
+#ifdef INC_USER_H_
+#include "user.h"
+#endif
+
+// ADDR (pin 2) connected to VSS
+#define SHT31_ADDRESS_VSS 0x44
+//ADDR (pin 2) connected to VDD
+#define SHT31_ADDRESS_VDD 0x45
+
+// SUPPORTED COMMANDS - single shot mode only
+#define SHT31_READ_STATUS       0xF32D
+#define SHT31_CLEAR_STATUS      0x3041
+
+#define SHT31_SOFT_RESET        0x30A2
+#define SHT31_HARD_RESET        0x0006
+
+#define SHT31_MEASUREMENT_FAST  0x2416    // page 10 datasheet
+#define SHT31_MEASUREMENT_SLOW  0x2400    // no clock stretching
+
+#define SHT31_HEAT_ON           0x306D
+#define SHT31_HEAT_OFF          0x3066
+#define SHT31_HEATER_TIMEOUT    180000UL  // milliseconds
+
+ReturnDef
+
+
+#endif /* INC_SHT31_H_ */

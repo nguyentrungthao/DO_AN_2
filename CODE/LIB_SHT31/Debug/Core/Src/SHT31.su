@@ -1,0 +1,6 @@
+../Core/Src/SHT31.c:10:19:SHT31_IsConnected	16	static
+../Core/Src/SHT31.c:14:19:SHT31_init	16	static
+../Core/Src/SHT31.c:21:19:SHT31_Crc	24	static
+../Core/Src/SHT31.c:43:19:SHT31_ReadTemperature	32	static
+../Core/Src/SHT31.c:52:6:HAL_I2C_MasterRxCpltCallback	16	static
+../Core/Src/SHT31.c:82:19:SHT31_WriteCMD	32	static

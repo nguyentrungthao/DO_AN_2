@@ -11,6 +11,7 @@ content_assist_proposals_foreground=216,216,216
 eclipse.preferences.version=1
 org.eclipse.cdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates/>
 scalability.detect=false
+scalability.reconciler=false
 semanticHighlighting.enumerator.color=153,193,241
 semanticHighlighting.enumerator.italic=true
 semanticHighlighting.externalSDK.color=5,255,0

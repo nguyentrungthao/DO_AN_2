@@ -93,7 +93,7 @@ int main(void)
 
   dichDuLieu74595(0);
 
-  HAL_GPIO_WritePin(OE_GPIO_Port, OE_Pin, 1); // cho phép xuất liên tục
+  HAL_GPIO_WritePin(OE_GPIO_Port, OE_Pin, 0); // cho phép xuất liên tục
 
   HAL_GPIO_WritePin(led1_7seg_GPIO_Port, led1_7seg_Pin, 1); // bật led 1
   HAL_GPIO_WritePin(led2_7seg_GPIO_Port, led2_7seg_Pin, 1); // bật led 2
