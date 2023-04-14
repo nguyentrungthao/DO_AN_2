@@ -49,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -57,35 +59,48 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Led_test_Pin GPIO_PIN_13
-#define Led_test_GPIO_Port GPIOC
-#define Led3_7seg_Pin GPIO_PIN_0
-#define Led3_7seg_GPIO_Port GPIOA
-#define Led2_7seg_Pin GPIO_PIN_1
-#define Led2_7seg_GPIO_Port GPIOA
-#define Led1_7seg_Pin GPIO_PIN_2
-#define Led1_7seg_GPIO_Port GPIOA
+#define Led_test1_Pin GPIO_PIN_13
+#define Led_test1_GPIO_Port GPIOC
+#define Led_test2_Pin GPIO_PIN_14
+#define Led_test2_GPIO_Port GPIOC
+#define Led_test3_Pin GPIO_PIN_15
+#define Led_test3_GPIO_Port GPIOC
+#define ESP_TX_Pin GPIO_PIN_2
+#define ESP_TX_GPIO_Port GPIOA
+#define ESP_RX_Pin GPIO_PIN_3
+#define ESP_RX_GPIO_Port GPIOA
+#define SRCLK_Pin GPIO_PIN_4
+#define SRCLK_GPIO_Port GPIOA
+#define RCLK_Pin GPIO_PIN_5
+#define RCLK_GPIO_Port GPIOA
+#define OE_Pin GPIO_PIN_6
+#define OE_GPIO_Port GPIOA
+#define SER_Pin GPIO_PIN_7
+#define SER_GPIO_Port GPIOA
 #define ACDET_Pin GPIO_PIN_0
 #define ACDET_GPIO_Port GPIOB
-#define ACDET_EXTI_IRQn EXTI0_IRQn
 #define TRIAC_Pin GPIO_PIN_1
 #define TRIAC_GPIO_Port GPIOB
-#define EnC_CH2_Pin GPIO_PIN_15
-#define EnC_CH2_GPIO_Port GPIOA
-#define ENC_CH1_Pin GPIO_PIN_3
-#define ENC_CH1_GPIO_Port GPIOB
-#define ENC_CH1_EXTI_IRQn EXTI3_IRQn
-#define EnC_BT_Pin GPIO_PIN_4
-#define EnC_BT_GPIO_Port GPIOB
-#define EnC_BT_EXTI_IRQn EXTI4_IRQn
-#define SER_Pin GPIO_PIN_6
-#define SER_GPIO_Port GPIOB
-#define OE_Pin GPIO_PIN_7
-#define OE_GPIO_Port GPIOB
-#define RCLK_Pin GPIO_PIN_8
-#define RCLK_GPIO_Port GPIOB
-#define SRCLK_Pin GPIO_PIN_9
-#define SRCLK_GPIO_Port GPIOB
+#define LOG_TX_Pin GPIO_PIN_10
+#define LOG_TX_GPIO_Port GPIOB
+#define LOG_RX_Pin GPIO_PIN_11
+#define LOG_RX_GPIO_Port GPIOB
+#define SD_CS_Pin GPIO_PIN_14
+#define SD_CS_GPIO_Port GPIOB
+#define SD_DET_Pin GPIO_PIN_15
+#define SD_DET_GPIO_Port GPIOB
+#define EnC_BT_Pin GPIO_PIN_10
+#define EnC_BT_GPIO_Port GPIOA
+#define LORA_CS_Pin GPIO_PIN_15
+#define LORA_CS_GPIO_Port GPIOA
+#define LORA_SCK_Pin GPIO_PIN_3
+#define LORA_SCK_GPIO_Port GPIOB
+#define LORA_MISO_Pin GPIO_PIN_4
+#define LORA_MISO_GPIO_Port GPIOB
+#define LORA_MOSI_Pin GPIO_PIN_5
+#define LORA_MOSI_GPIO_Port GPIOB
+#define LORA_RST_Pin GPIO_PIN_6
+#define LORA_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

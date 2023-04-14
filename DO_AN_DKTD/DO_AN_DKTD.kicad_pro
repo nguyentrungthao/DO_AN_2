@@ -34,9 +34,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.762,
-          "height": 1.524,
-          "width": 1.524
+          "drill": 1.0,
+          "height": 1.7,
+          "width": 1.7
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -46,7 +46,7 @@
         "silk_text_upright": false,
         "zones": {
           "45_degree_only": false,
-          "min_clearance": 0.3
+          "min_clearance": 0.18
         }
       },
       "diff_pair_dimensions": [
@@ -63,7 +63,7 @@
       "rule_severities": {
         "annular_width": "error",
         "clearance": "error",
-        "connection_width": "warning",
+        "connection_width": "ignore",
         "copper_edge_clearance": "error",
         "copper_sliver": "warning",
         "courtyards_overlap": "error",
@@ -125,8 +125,8 @@
         "min_silk_clearance": 0.0,
         "min_text_height": 0.7999999999999999,
         "min_text_thickness": 0.08,
-        "min_through_hole_diameter": 0.3,
-        "min_track_width": 0.35,
+        "min_through_hole_diameter": 0.19999999999999998,
+        "min_track_width": 0.25,
         "min_via_annular_width": 0.049999999999999996,
         "min_via_diameter": 0.39999999999999997,
         "solder_mask_clearance": 0.0,
@@ -176,8 +176,9 @@
       ],
       "track_widths": [
         0.0,
-        0.35,
+        0.25,
         0.5,
+        0.75,
         1.0,
         2.0
       ],
@@ -185,6 +186,14 @@
         {
           "diameter": 0.0,
           "drill": 0.0
+        },
+        {
+          "diameter": 0.4,
+          "drill": 0.2
+        },
+        {
+          "diameter": 0.6,
+          "drill": 0.3
         }
       ],
       "zones_allow_external_fillets": true,
@@ -198,7 +207,9 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "label_dangling|1733550|1727200|c8cc8adc-9310-4fd0-a14d-1e561a699e54|00000000-0000-0000-0000-000000000000|||"
+    ],
     "meta": {
       "version": 0
     },
@@ -398,7 +409,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
       "simulation_model_issue": "error",
@@ -502,6 +513,22 @@
     [
       "fe9c1bbb-8428-4aad-931e-ea95c4d011b3",
       ""
+    ],
+    [
+      "564651a1-4f7d-4d4b-bd97-c8103ff3452e",
+      "STM32"
+    ],
+    [
+      "24a20ba6-d689-4def-9a51-4ba12b1afb4b",
+      "POWER"
+    ],
+    [
+      "8388bde3-c004-43a9-b310-2cc14625d343",
+      "Peripheral"
+    ],
+    [
+      "514f7f67-6c84-4d42-8fe7-76f8a193466f",
+      "ESP"
     ]
   ],
   "text_variables": {}
