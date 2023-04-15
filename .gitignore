@@ -9,7 +9,11 @@
 Gen*
 bom/
 DOCUMENT
-
+GERBER_V1.0/
+*.gbr
+*.drl 
+*.gbrjob
+*.ps
 # Temporary files
 *.000
 *.bak
