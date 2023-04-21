@@ -4551,8 +4551,8 @@
     )
   )
 
-  (bus_alias "pLORA" (members "INT" "CS" "RST"))
   (bus_alias "I2C" (members "SDA" "SCL"))
+  (bus_alias "pLORA" (members "INT" "CS" "RST"))
   (bus_alias "SPI" (members "SCK" "MOSI" "MISO"))
   (junction (at 258.445 239.395) (diameter 0) (color 0 0 0 0)
     (uuid 003d644a-ae66-4c62-b2b5-87b056251c34)

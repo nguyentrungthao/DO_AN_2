@@ -69,16 +69,17 @@ void Error_Handler(void);
 #define ESP_TX_GPIO_Port GPIOA
 #define ESP_RX_Pin GPIO_PIN_3
 #define ESP_RX_GPIO_Port GPIOA
-#define SRCLK_Pin GPIO_PIN_4
-#define SRCLK_GPIO_Port GPIOA
-#define RCLK_Pin GPIO_PIN_5
-#define RCLK_GPIO_Port GPIOA
-#define OE_Pin GPIO_PIN_6
-#define OE_GPIO_Port GPIOA
-#define SER_Pin GPIO_PIN_7
+#define SER_Pin GPIO_PIN_4
 #define SER_GPIO_Port GPIOA
+#define OE_Pin GPIO_PIN_5
+#define OE_GPIO_Port GPIOA
+#define RLCK_Pin GPIO_PIN_6
+#define RLCK_GPIO_Port GPIOA
+#define SRCLK_Pin GPIO_PIN_7
+#define SRCLK_GPIO_Port GPIOA
 #define ACDET_Pin GPIO_PIN_0
 #define ACDET_GPIO_Port GPIOB
+#define ACDET_EXTI_IRQn EXTI0_IRQn
 #define TRIAC_Pin GPIO_PIN_1
 #define TRIAC_GPIO_Port GPIOB
 #define LOG_TX_Pin GPIO_PIN_10
@@ -89,8 +90,10 @@ void Error_Handler(void);
 #define SD_CS_GPIO_Port GPIOB
 #define SD_DET_Pin GPIO_PIN_15
 #define SD_DET_GPIO_Port GPIOB
+#define SD_DET_EXTI_IRQn EXTI15_10_IRQn
 #define EnC_BT_Pin GPIO_PIN_10
 #define EnC_BT_GPIO_Port GPIOA
+#define EnC_BT_EXTI_IRQn EXTI15_10_IRQn
 #define LORA_CS_Pin GPIO_PIN_15
 #define LORA_CS_GPIO_Port GPIOA
 #define LORA_SCK_Pin GPIO_PIN_3
@@ -99,7 +102,10 @@ void Error_Handler(void);
 #define LORA_MISO_GPIO_Port GPIOB
 #define LORA_MOSI_Pin GPIO_PIN_5
 #define LORA_MOSI_GPIO_Port GPIOB
-#define LORA_RST_Pin GPIO_PIN_6
+#define LORA_INT_Pin GPIO_PIN_6
+#define LORA_INT_GPIO_Port GPIOB
+#define LORA_INT_EXTI_IRQn EXTI9_5_IRQn
+#define LORA_RST_Pin GPIO_PIN_7
 #define LORA_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
