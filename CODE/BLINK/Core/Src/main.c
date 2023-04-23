@@ -45,7 +45,13 @@ TIM_HandleTypeDef htim1;
 /* USER CODE BEGIN PV */
 uint16_t counter = 0;
 uint32_t t1 = 0;
-uint8_t ledStatus = 0;
+uint32_t t2 = 0;
+uint32_t t3 = 0;
+uint32_t t4 = 0;
+uint8_t ledStatus1 = 0;
+uint8_t ledStatus2 = 0;
+uint8_t ledStatus3 = 0;
+uint8_t ledStatus4 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,9 +108,23 @@ int main(void)
   {
 	  if(HAL_GetTick() - t1 >= 500){
 		  t1 = HAL_GetTick();
-		  ledStatus = ~ledStatus;
-		  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledStatus);
-		  counter ++;
+		  ledStatus1 = ~ledStatus1;
+		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ledStatus1);
+	  }
+	  if(HAL_GetTick() - t2 >= 1000){
+		  t2 = HAL_GetTick();
+		  ledStatus2 = ~ledStatus2;
+		  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, ledStatus2);
+	  }
+	  if(HAL_GetTick() - t3 >= 1500){
+		  t3 = HAL_GetTick();
+		  ledStatus3 = ~ledStatus3;
+		  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, ledStatus3);
+	  }
+	  if(HAL_GetTick() - t4 >= 1){
+		  t4 = HAL_GetTick();
+		  ledStatus4 = ~ledStatus4;
+		  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, ledStatus4);
 	  }
 //---------------------------------BLINK LED--------------------------------//
 //	  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, LED_ON);
@@ -217,27 +237,29 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : LED1_Pin LED2_Pin LED3_Pin */
+  GPIO_InitStruct.Pin = LED1_Pin|LED2_Pin|LED3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BT_Pin */
-  GPIO_InitStruct.Pin = BT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  /*Configure GPIO pin : BUZZER_Pin */
+  GPIO_InitStruct.Pin = BUZZER_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BT_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct);
 
 }
 

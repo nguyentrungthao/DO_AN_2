@@ -1,0 +1,20 @@
+/*
+ * Segment7_74595.c
+ *
+ *  Created on: Apr 22, 2023
+ *      Author: nguye
+ */
+#include "Segment7_74595.h"
+
+
+/*
+ * brief: send data 16 bit to two 74595
+ * */
+void sendData74595(uint16_t);
+
+/*
+ * brief: export data in S7seg variable
+ * warning SHOUDLE BE CALL WHILE(TRUE)
+ * */
+void Scan7seg();
+

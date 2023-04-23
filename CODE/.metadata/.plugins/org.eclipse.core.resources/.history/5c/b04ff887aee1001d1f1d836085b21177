@@ -1,0 +1,42 @@
+/*
+ * Segment7_74595.c
+ *
+ *  Created on: Apr 22, 2023
+ *      Author: nguye
+ */
+#include "Segment7_74595.h"
+
+
+/*
+ * brief: send data 16 bit to two 74595
+ * */
+//void sendData74595(uint16_t data){
+//	for (uint8_t i = 0; i < 16; i++) {
+//		HAL_GPIO_WritePin(SER_GPIO_Port, SER_Pin, (data >> i) & 0x01);
+//		//nhịp 1 xung cạnh xuống đưa dữ liệu vào tầng lưu trữ
+//		HAL_GPIO_WritePin(SRCLK_GPIO_Port, SRCLK_Pin, 0);
+//		HAL_GPIO_WritePin(SRCLK_GPIO_Port, SRCLK_Pin, 1);
+//	}
+//	HAL_GPIO_WritePin(RCLK_GPIO_Port, RCLK_Pin, 0);
+//	HAL_GPIO_WritePin(RCLK_GPIO_Port, RCLK_Pin, 1);
+//}
+
+/*
+ * brief: export data in S7seg variable
+ * warning SHOUDLE BE CALL WHILE(TRUE)
+ * */
+void Scan7seg(){
+	static uint32_t T_delay = 0;
+	static uint8_t index = 0;
+	if(index < 7){
+		if(HAL_GetTick() - T_delay >= 1) {
+			T_delay = HAL_GetTick();
+			sendData74595((0x0100 << index) | S7seg.led[index]);
+			index++;
+		}
+	}
+	else{
+		index = 0;
+	}
+}
+
