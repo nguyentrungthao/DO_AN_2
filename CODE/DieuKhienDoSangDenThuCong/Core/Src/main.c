@@ -65,7 +65,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim->Instance == TIM1){
 		if(CHECKFLAG(FLAG_ACDET_TRIGGER)){
 			CLEARFLAG(FLAG_ACDET_TRIGGER);
-			SETFLAG(FLAG_TIM_OVERFLOW);
+			  for(uint8_t i=0;i<60;i++){
+				  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+			  }
+			  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
 		}
 	}
 }
@@ -73,7 +76,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin == ACDET_Pin){
 		SETFLAG(FLAG_ACDET_TRIGGER);
-		__HAL_TIM_SET_COUNTER(&htim1, 8000);
+		__HAL_TIM_SET_COUNTER(&htim1, 5000);
 
 	}
 }
@@ -118,13 +121,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(CHECKFLAG(FLAG_TIM_OVERFLOW)){
-		  CLEARFLAG(FLAG_TIM_OVERFLOW);
-		  for(uint8_t i=0;i<60;i++){
-			  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
-		  }
-		  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
-	  }
+//	  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+//	  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+//	  HAL_Delay(1);
+//	  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
+//	  HAL_Delay(9);
+//	  HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

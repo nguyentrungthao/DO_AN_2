@@ -61,7 +61,7 @@ main-build: DO_AN_MON_DKTD.elf secondary-outputs
 
 # Tool invocations
 DO_AN_MON_DKTD.elf DO_AN_MON_DKTD.map: $(OBJS) $(USER_OBJS) E:\SCHOOL\CURRICULUM\current\DO_AN_DKTD\CODE\DO_AN_MON_DKTD\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "DO_AN_MON_DKTD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"E:\SCHOOL\CURRICULUM\current\DO_AN_DKTD\CODE\DO_AN_MON_DKTD\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DO_AN_MON_DKTD.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "DO_AN_MON_DKTD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"E:\SCHOOL\CURRICULUM\current\DO_AN_DKTD\CODE\DO_AN_MON_DKTD\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DO_AN_MON_DKTD.map" -Wl,--gc-sections -static -u_printf_float --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

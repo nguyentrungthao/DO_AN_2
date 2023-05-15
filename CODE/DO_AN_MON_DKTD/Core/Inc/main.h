@@ -73,6 +73,7 @@ void Error_Handler(void);
 #define SRCLK_GPIO_Port GPIOA
 #define ACDET_Pin GPIO_PIN_0
 #define ACDET_GPIO_Port GPIOB
+#define ACDET_EXTI_IRQn EXTI0_IRQn
 #define TRIAC_Pin GPIO_PIN_1
 #define TRIAC_GPIO_Port GPIOB
 #define EnC_BT_Pin GPIO_PIN_10

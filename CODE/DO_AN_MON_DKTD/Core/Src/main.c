@@ -22,12 +22,17 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "SHT31.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct {
+  double giaTriTinh_HienTai, giaTriTinh_Truoc, giaTriDieuKhien;
+  double e, e1, e2, nhietDo, giaTriDat;
+} PID_type;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -36,6 +41,18 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+#define CHECKFLAG(FLAG, variable) (variable & FLAG ? 1 : 0)
+#define SETFLAG(FLAG, variable) (variable |= (FLAG))
+#define CLEARFLAG(FLAG, variable) (variable &= ~(FLAG))
+
+#define FLAG_ACDET_TRIGGER 	(1 << 0)
+#define FLAG_TIM_OVERFLOW 	(1 << 1)
+#define FLAG_COMPLETE_RECEIVE_UART (1 << 2)
+#define FLAG_BLINK_7SEGMENT (1 << 3)
+#define FLAG_SETUP_SETPOINT (1 << 4)
+
+
 #define SEGMENT_A	(1 << 0)
 #define SEGMENT_B	(1 << 2)
 #define SEGMENT_C	(1 << 4)
@@ -44,6 +61,11 @@
 #define SEGMENT_F	(1 << 1)
 #define SEGMENT_G	(1 << 3)
 #define SEGMENT_DOT	(1 << 5)
+
+
+#define SO_LAN_DO_SHT31 50
+
+#define SETPOINT 50
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -51,6 +73,7 @@ I2C_HandleTypeDef hi2c1;
 
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim4;
 
@@ -62,12 +85,24 @@ PCD_HandleTypeDef hpcd_USB_FS;
 /* USER CODE BEGIN PV */
 
 //array data export to 7 segment
+
+double KP = 0.65, KI = 0.0001, KD = 0, TG_LAY_MAU = 1;
+
+PID_type triac = {0, 0, 0, 0, 0, 0, 0, 0};
+
 SHT31_type SHT31;
 
 uint8_t s7seg[7] = {0};
 //7 segment code
 const char code7seg[] = {0xD7, 0x14, 0xCD, 0x5D, 0x1E, 0x5B, 0xDB, 0x15, 0xDF, 0x5F};
 
+uint8_t flag = 0;
+
+uint8_t str[50] = {0};
+uint8_t rx_str_uart3[10] = {0};
+uint8_t Get_rx_str[1] = {0};
+volatile uint16_t encoderValue = 0;
+//uint8_t i;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,17 +115,23 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_PCD_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
-void PID_Caculator();
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+
+HAL_StatusTypeDef PID_Caculator(PID_type* x);
 void sendData74595(uint16_t data);
 void Scan7seg();
+
+void xuLyChuoiNhanVeTuLaptop();
 /* USER CODE END 0 */
 
 /**
@@ -101,7 +142,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint32_t t = 0;
-	double temperature = 0;
+	uint32_t tBlink = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -129,27 +170,74 @@ int main(void)
   MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  SHT31_init(&SHT31, &hi2c1);
 
-  s7seg[1] = code7seg[3];
-  s7seg[3] = code7seg[3] | SEGMENT_DOT;
-  s7seg[5] = code7seg[3];
+  HAL_UART_Receive_IT(&huart3, Get_rx_str, 1);
+  HAL_UART_Receive_IT(&huart2, Get_rx_str, 1);
+//  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Stop_IT(&htim4);
+  HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
+
+  triac.giaTriDat = SETPOINT;
+  __HAL_TIM_SET_COUNTER(&htim1, SETPOINT * 10);
+  s7seg[3] = s7seg[4] = s7seg[5] = s7seg[6] = SEGMENT_G;
+
+  while(SHT31_init(&SHT31, &hi2c1) != HAL_OK){
+	if(HAL_GetTick() - t >= 500){
+		t = HAL_GetTick();
+		if(s7seg[0] == 0x00){
+			s7seg[0] = SEGMENT_A | SEGMENT_D | SEGMENT_E | SEGMENT_F | SEGMENT_G;
+			s7seg[1] = s7seg[2] = SEGMENT_E | SEGMENT_G;
+		}
+		else{
+			s7seg[0] = s7seg[1] = s7seg[2] = 0x00;
+		}
+	}
+	Scan7seg();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(HAL_GetTick() - t >= 1000){
+	  if(HAL_GetTick() - t >= (uint32_t)(1000 * TG_LAY_MAU)){
 		  t = HAL_GetTick();
 
 		  SHT31_WriteCMD(&SHT31, SHT31_MEASUREMENT_FAST);
-		  while(SHT31_ReadTemperature(&SHT31, &temperature) != HAL_OK);
+		  while(SHT31_ReadTemperature(&SHT31, &triac.nhietDo) != HAL_OK);
 
-		  s7seg[0] = code7seg[(uint8_t)(temperature / 10)];
-		  s7seg[1] = code7seg[(uint8_t)temperature % 10] | SEGMENT_DOT;
-		  s7seg[2] = code7seg[(uint16_t)(temperature * 10) % 10];
+		  PID_Caculator(&triac);
+
+		  sprintf(str, "%-2.2lf°C, %-2.2lf°C, %-2.2lf°C, %-2.2lf\n", triac.nhietDo, triac.giaTriDat, triac.e, triac.giaTriDieuKhien);
+		  HAL_UART_Transmit(&huart3, str, sizeof(str), 10000);
+		  s7seg[0] = code7seg[(uint16_t)triac.nhietDo / 10];
+		  s7seg[1] = code7seg[(uint16_t)triac.nhietDo % 10] | SEGMENT_DOT;
+		  s7seg[2] = code7seg[(uint16_t)(triac.nhietDo * 10) % 10];
+	  }
+
+	  if(CHECKFLAG(FLAG_COMPLETE_RECEIVE_UART, flag)){
+		  xuLyChuoiNhanVeTuLaptop();
+		  memset(str, 0, sizeof(str));
+		  CLEARFLAG(FLAG_COMPLETE_RECEIVE_UART, flag);
+	  }
+
+	  if(!CHECKFLAG(FLAG_SETUP_SETPOINT, flag)){
+		  encoderValue = __HAL_TIM_GetCounter(&htim1);
+		  triac.giaTriDat = (double)encoderValue / 10;
+			if(HAL_GetTick() - tBlink >= 300){
+				tBlink = HAL_GetTick();
+				if(s7seg[3] == 0x00){
+					s7seg[3] = code7seg[encoderValue / 100];
+					s7seg[4] = code7seg[encoderValue / 10 % 10] | SEGMENT_DOT;
+					s7seg[5] = code7seg[encoderValue % 10];
+				}
+				else{
+					s7seg[3] = s7seg[4] = s7seg[5] = 0x00;
+				}
+			}
+
 	  }
     /* USER CODE END WHILE */
 
@@ -274,6 +362,56 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_Encoder_InitTypeDef sConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 1000 - 1;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 0;
+  if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
 
 }
 
@@ -528,6 +666,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(EnC_BT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
@@ -535,9 +676,60 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+HAL_StatusTypeDef PID_Caculator(PID_type* x) {
+  static double alpha, beta, gamma;
+
+  x->e = x->giaTriDat - x->nhietDo;
+  alpha = 2 * TG_LAY_MAU * KP + KI * TG_LAY_MAU * TG_LAY_MAU + 2 * KD;
+  beta = TG_LAY_MAU * TG_LAY_MAU * KI - 4 * KD - 2 * TG_LAY_MAU * KP;
+  gamma = 2 * KD;
+  x->giaTriTinh_HienTai = (alpha * x->e + beta * x->e1 +
+		gamma * x->e2 + 2 * TG_LAY_MAU * x->giaTriTinh_Truoc) / (2 * TG_LAY_MAU);
+
+  x->giaTriTinh_Truoc = x->giaTriTinh_HienTai;
+  x->e2 = x->e1;
+  x->e1 = x->e;
+
+  if (x->giaTriTinh_HienTai > 9)
+    x->giaTriTinh_HienTai = 9;
+  else if (x->giaTriTinh_HienTai <= 1)
+    x->giaTriTinh_HienTai = 1;
+
+  x->giaTriDieuKhien = x->giaTriTinh_HienTai; /***************/
+
+  return HAL_OK;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
+	  if (htim->Instance == TIM4) {
+	    if (CHECKFLAG(FLAG_ACDET_TRIGGER, flag)) {
+	      CLEARFLAG(FLAG_ACDET_TRIGGER, flag);
+	      HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 1);
+	      for(uint8_t i = 0; i < 60; i++);
+	      HAL_GPIO_WritePin(TRIAC_GPIO_Port, TRIAC_Pin, 0);
+	    }
+	  }
+}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin == ACDET_Pin){
-
+		SETFLAG(FLAG_ACDET_TRIGGER, flag);
+		__HAL_TIM_SET_COUNTER(&htim4, (uint16_t)(triac.giaTriDieuKhien * 1000));
+//		__HAL_TIM_SET_COUNTER(&htim4, 9000);
+	}
+	if(GPIO_Pin == EnC_BT_Pin){
+		if(CHECKFLAG(FLAG_SETUP_SETPOINT, flag)){
+			HAL_TIM_Base_Stop_IT(&htim4);
+			CLEARFLAG(FLAG_SETUP_SETPOINT, flag);
+			s7seg[3] = s7seg[4] = s7seg[5] = s7seg[6] = SEGMENT_G;
+		}
+		else{
+			SETFLAG(FLAG_SETUP_SETPOINT, flag);
+			s7seg[3] = code7seg[encoderValue / 100];
+			s7seg[4] = code7seg[encoderValue / 10 % 10] | SEGMENT_DOT;
+			s7seg[5] = code7seg[encoderValue % 10];
+			s7seg[6] = SEGMENT_A | SEGMENT_B | SEGMENT_F | SEGMENT_G;
+			HAL_TIM_Base_Start_IT(&htim4);
+		}
 	}
 }
 
@@ -571,6 +763,66 @@ void Scan7seg(){
 	else{
 		index = 0;
 	}
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	static uint8_t i = 0;
+	if(huart->Instance == huart3.Instance){
+		HAL_UART_Receive_IT(&huart3, Get_rx_str, 1);
+		if(Get_rx_str[0] == 'x'){
+			SETFLAG(FLAG_COMPLETE_RECEIVE_UART, flag);
+			i = 0;
+		}
+		else{
+			rx_str_uart3[i++] = Get_rx_str[0];
+		}
+	}
+	if(huart->Instance == huart2.Instance){
+		HAL_UART_Receive_IT(&huart2, Get_rx_str, 1);
+		switch(Get_rx_str[0]){
+		case 'a':
+			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 0);
+			break;
+		case 'b':
+			HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 1);
+			break;
+		case 'c':
+			HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, 0);
+			break;
+		case 'd':
+			HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, 1);
+		}
+	}
+}
+
+void xuLyChuoiNhanVeTuLaptop(){
+	double val = atof(rx_str_uart3 + 2);
+
+	if(rx_str_uart3[0] == 'k'){
+		if(rx_str_uart3[1] == 'p'){
+			KP = val;
+		}
+		else if(rx_str_uart3[1] == 'i'){
+			KI = val;
+		}
+		else if(rx_str_uart3[1] == 'd'){
+			KD = val;
+		}
+	}
+	else if(rx_str_uart3[0] == 's' && rx_str_uart3[1] == 'p'){
+		triac.giaTriDat = val;
+		//	triac.giaTriDat = atof(rx_str);
+		s7seg[3] = code7seg[(uint8_t)(triac.giaTriDat / 10)];
+		s7seg[4] = code7seg[(uint8_t)triac.giaTriDat % 10] | SEGMENT_DOT;
+		s7seg[5] = code7seg[(uint16_t)(triac.giaTriDat * 10) % 10];
+		s7seg[6] = SEGMENT_G | SEGMENT_E | SEGMENT_D;
+
+	}
+	else if(rx_str_uart3[0] == 't' && rx_str_uart3[1] == 'g'){
+		TG_LAY_MAU = val;
+	}
+	sprintf(str, "\n\n%lf, %lf, %lf, %lf\n\n", KP, KI, KD, TG_LAY_MAU);
+	HAL_UART_Transmit(&huart3, str, sizeof(str), 10000);
 }
 /* USER CODE END 4 */
 
